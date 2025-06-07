@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'services/pais_service.dart';
+import 'models/pais.dart';
+import 'telas/tela_detalhes.dart';
 
-void main() => runApp(const MeuApp());
+void main() {
+  runApp(const MeuApp());
+}
 
 class MeuApp extends StatelessWidget {
   const MeuApp({super.key});
@@ -15,42 +18,16 @@ class MeuApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const TelaPaises(),
+      home: TelaPaises(service: PaisService()),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class Pais {
-  final String nome;
-  final String bandeira;
-  final String capital;
-  final String regiao;
-  final int populacao;
-
-  Pais({
-    required this.nome,
-    required this.bandeira,
-    required this.capital,
-    required this.regiao,
-    required this.populacao,
-  });
-
-  factory Pais.fromJson(Map<String, dynamic> json) {
-    return Pais(
-      nome: json['name']['common'] ?? '',
-      bandeira: json['flags']['png'] ?? '',
-      capital: (json['capital'] != null && json['capital'].isNotEmpty)
-          ? json['capital'][0]
-          : 'N/A',
-      regiao: json['region'] ?? 'N/A',
-      populacao: json['population'] ?? 0,
-    );
-  }
-}
-
 class TelaPaises extends StatefulWidget {
-  const TelaPaises({super.key});
+  final PaisService service;
+
+  const TelaPaises({super.key, required this.service});
 
   @override
   State<TelaPaises> createState() => _TelaPaisesState();
@@ -79,22 +56,15 @@ class _TelaPaisesState extends State<TelaPaises> {
   }
 
   Future<void> _buscarPaises() async {
-    final resposta = await http.get(
-      Uri.parse('https://restcountries.com/v3.1/all'),
-    );
-
-    if (resposta.statusCode == 200) {
-      final List dados = json.decode(resposta.body);
-      final paises = dados.map((e) => Pais.fromJson(e)).toList()
-        ..sort((a, b) => a.nome.compareTo(b.nome));
-
+    try {
+      final paises = await widget.service.listarPaises();
+      paises.sort((a, b) => a.nome.compareTo(b.nome));
       setState(() {
         _todosPaises.addAll(paises);
         _carregando = false;
       });
-
       _carregarMais();
-    } else {
+    } catch (e) {
       setState(() => _carregando = false);
     }
   }
@@ -137,7 +107,7 @@ class _TelaPaisesState extends State<TelaPaises> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Lista de Paises')),
+      appBar: AppBar(title: const Text('Lista de Países')),
       body: _paisesVisiveis.isEmpty
           ? const Center(child: Text('Nenhum país carregado'))
           : ListView.builder(
@@ -148,9 +118,7 @@ class _TelaPaisesState extends State<TelaPaises> {
                   final pais = _paisesVisiveis[index];
                   return Padding(
                     padding: const EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 16,
-                    ),
+                        vertical: 12, horizontal: 16),
                     child: Card(
                       elevation: 2,
                       child: ListTile(
@@ -178,41 +146,6 @@ class _TelaPaisesState extends State<TelaPaises> {
                 }
               },
             ),
-    );
-  }
-}
-
-class TelaDetalhes extends StatelessWidget {
-  final Pais pais;
-
-  const TelaDetalhes({super.key, required this.pais});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(pais.nome)),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(child: Image.network(pais.bandeira, height: 100)),
-            const SizedBox(height: 20),
-            Text(
-              "Capital: ${pais.capital}",
-              style: const TextStyle(fontSize: 18),
-            ),
-            Text(
-              "Região: ${pais.regiao}",
-              style: const TextStyle(fontSize: 18),
-            ),
-            Text(
-              "População: ${pais.populacao}",
-              style: const TextStyle(fontSize: 18),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
