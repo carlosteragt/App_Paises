@@ -1,4 +1,4 @@
-name: lazy_loading
+name: app_paises
 description: "A new Flutter project."
 publish_to: 'none'
 version: 0.1.0
@@ -10,13 +10,13 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^0.13.5
-  mockito: ^5.4.0
-  build_runner:
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  mockito: ^5.4.4
+  build_runner: ^2.4.8
 
 flutter:
   uses-material-design: true
