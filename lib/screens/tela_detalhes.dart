@@ -13,6 +13,7 @@ class TelaDetalhes extends StatelessWidget {
     if (pais.bandeira.isNotEmpty) {
       imageWidget = Image.network(pais.bandeira, height: 100);
     } else {
+      //container pra evitar erro no teste
       imageWidget = Container(
         height: 100,
         width: 160,
