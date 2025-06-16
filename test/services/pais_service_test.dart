@@ -17,7 +17,8 @@ void main() {
   test('Cenário 01 - Listagem bem-sucedida', () async {
     final pais = Pais(
       nome: 'Afghanistan',
-      bandeira: '',
+      bandeira:
+          '', //deixei as bandeiras vazias porque estava dando erro ao passar o link
       capital: 'Kabul',
       regiao: 'Asia',
       populacao: 40218234,
